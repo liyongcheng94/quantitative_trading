@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>量化学习四阶段路线图 · Quant Roadmap</title>
+<style>
+:root{
+  --bg:#0d1117; --surface:#161b22; --surface-2:#1c2330;
+  --border:#2d3441; --text:#e6edf3; --text-muted:#8b949e;
+  --gold:#d4a056; --gold-bright:#f0c674;
+  --blue:#60a5fa; --purple:#c084fc; --green:#4ade80; --red:#f87171;
+}
+*{box-sizing:border-box; margin:0; padding:0}
+body{
+  background:var(--bg); color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  line-height:1.75; font-size:16px; padding:40px 20px;
+}
+.container{max-width:1000px; margin:0 auto}
+
+/* HERO */
+.hero{padding:72px 0 48px; text-align:center; border-bottom:1px solid var(--border); margin-bottom:48px}
+.hero .emoji{font-size:56px; margin-bottom:16px}
+.hero .eyebrow{font-family:"JetBrains Mono",Consolas,monospace; font-size:12px;
+  letter-spacing:0.2em; text-transform:uppercase; color:var(--gold); margin-bottom:16px}
+.hero h1{font-family:Georgia,"Source Han Serif SC","Noto Serif CJK SC",serif;
+  font-size:clamp(34px,5vw,54px); line-height:1.2; font-weight:700; margin-bottom:20px}
+.hero .subtitle{font-size:18px; color:var(--text-muted); max-width:640px; margin:0 auto 36px}
+.hero .stats{display:flex; justify-content:center; gap:48px; flex-wrap:wrap;
+  font-family:monospace; font-size:13px; color:var(--text-muted)}
+.hero .stats strong{display:block; font-size:28px; color:var(--gold-bright);
+  font-weight:700; margin-bottom:4px; font-family:Georgia,serif}
+
+/* PROGRESS BAR */
+.roadmap-track{display:flex; align-items:center; justify-content:center;
+  padding:24px 0; margin-bottom:24px; flex-wrap:wrap; gap:8px}
+.roadmap-track .step{padding:10px 18px; border:1px solid var(--border);
+  border-radius:24px; background:var(--surface); font-size:13px; color:var(--text-muted);
+  font-family:monospace; display:flex; align-items:center; gap:8px}
+.roadmap-track .step .dot{width:8px; height:8px; border-radius:50%; background:var(--border)}
+.roadmap-track .step.s1 .dot{background:var(--blue); box-shadow:0 0 12px var(--blue)}
+.roadmap-track .step.s2 .dot{background:var(--gold); box-shadow:0 0 12px var(--gold)}
+.roadmap-track .step.s3 .dot{background:var(--purple); box-shadow:0 0 12px var(--purple)}
+.roadmap-track .step.s4 .dot{background:var(--green); box-shadow:0 0 12px var(--green)}
+.roadmap-track .arrow{color:var(--text-muted); opacity:0.4}
+
+/* PHASE CARD */
+.phase{position:relative; background:var(--surface); border:1px solid var(--border);
+  border-radius:16px; padding:40px; margin:32px 0; overflow:hidden}
+.phase::before{content:""; position:absolute; left:0; top:0; bottom:0; width:5px}
+.phase.p1::before{background:linear-gradient(180deg,var(--blue),transparent)}
+.phase.p2::before{background:linear-gradient(180deg,var(--gold),transparent)}
+.phase.p3::before{background:linear-gradient(180deg,var(--purple),transparent)}
+.phase.p4::before{background:linear-gradient(180deg,var(--green),transparent)}
+
+.phase-bg-num{position:absolute; right:24px; top:-20px; font-family:Georgia,serif;
+  font-size:200px; font-weight:900; line-height:1; opacity:0.04; user-select:none; pointer-events:none}
+.phase.p1 .phase-bg-num{color:var(--blue)}
+.phase.p2 .phase-bg-num{color:var(--gold)}
+.phase.p3 .phase-bg-num{color:var(--purple)}
+.phase.p4 .phase-bg-num{color:var(--green)}
+
+.phase-header{display:flex; justify-content:space-between; align-items:flex-start;
+  margin-bottom:28px; flex-wrap:wrap; gap:16px; position:relative; z-index:1}
+.phase-meta{display:flex; flex-direction:column; gap:6px}
+.phase-tag{font-family:monospace; font-size:11px; letter-spacing:0.15em;
+  text-transform:uppercase; color:var(--text-muted)}
+.phase.p1 .phase-tag{color:var(--blue)}
+.phase.p2 .phase-tag{color:var(--gold)}
+.phase.p3 .phase-tag{color:var(--purple)}
+.phase.p4 .phase-tag{color:var(--green)}
+.phase-title{font-family:Georgia,serif; font-size:36px; font-weight:700; line-height:1.2}
+.phase-title .sep{color:var(--text-muted); font-weight:400; margin:0 8px; font-size:28px}
+.phase-title .sub{color:var(--text-muted); font-size:24px; font-weight:400}
+.phase-duration{padding:8px 16px; border-radius:20px; font-family:monospace;
+  font-size:13px; font-weight:600; border:1px solid; white-space:nowrap}
+.phase.p1 .phase-duration{background:rgba(96,165,250,0.1); border-color:rgba(96,165,250,0.3); color:var(--blue)}
+.phase.p2 .phase-duration{background:rgba(212,160,86,0.1); border-color:rgba(212,160,86,0.3); color:var(--gold-bright)}
+.phase.p3 .phase-duration{background:rgba(192,132,252,0.1); border-color:rgba(192,132,252,0.3); color:var(--purple)}
+.phase.p4 .phase-duration{background:rgba(74,222,128,0.1); border-color:rgba(74,222,128,0.3); color:var(--green)}
+
+.phase-goal{padding:18px 22px; border-radius:10px; margin-bottom:28px;
+  background:var(--surface-2); border-left:3px solid var(--gold); position:relative; z-index:1}
+.phase.p1 .phase-goal{border-left-color:var(--blue)}
+.phase.p2 .phase-goal{border-left-color:var(--gold)}
+.phase.p3 .phase-goal{border-left-color:var(--purple)}
+.phase.p4 .phase-goal{border-left-color:var(--green)}
+.phase-goal .label{font-size:12px; letter-spacing:0.1em; text-transform:uppercase;
+  color:var(--text-muted); margin-bottom:6px; font-family:monospace}
+.phase-goal p{font-size:17px; margin:0}
+
+.topics{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:16px; margin-bottom:24px; position:relative; z-index:1}
+.topic{background:var(--surface-2); border:1px solid var(--border);
+  border-radius:10px; padding:22px}
+.topic-head{display:flex; align-items:center; gap:12px; margin-bottom:12px}
+.topic-icon{font-size:26px; line-height:1}
+.topic h4{font-size:17px; color:var(--text); font-weight:600}
+.topic-tag-lvl{font-family:monospace; font-size:10px; padding:2px 8px; border-radius:10px;
+  background:rgba(255,255,255,0.06); color:var(--text-muted); letter-spacing:0.05em}
+.topic p{font-size:14px; color:var(--text-muted); margin:0; line-height:1.7}
+
+.tools{display:flex; flex-wrap:wrap; gap:8px; padding-top:20px;
+  border-top:1px solid var(--border); position:relative; z-index:1}
+.tools .lbl{font-family:monospace; font-size:11px; color:var(--text-muted);
+  text-transform:uppercase; letter-spacing:0.1em; align-self:center; margin-right:8px}
+.tool{padding:5px 12px; border-radius:16px; font-family:monospace;
+  font-size:12px; background:var(--surface-2); border:1px solid var(--border); color:var(--text)}
+.phase.p1 .tool{border-color:rgba(96,165,250,0.25); color:var(--blue)}
+.phase.p2 .tool{border-color:rgba(212,160,86,0.25); color:var(--gold-bright)}
+.phase.p3 .tool{border-color:rgba(192,132,252,0.25); color:var(--purple)}
+.phase.p4 .tool{border-color:rgba(74,222,128,0.25); color:var(--green)}
+
+/* ARROW BETWEEN PHASES */
+.arrow-sep{text-align:center; padding:8px 0; color:var(--text-muted); opacity:0.4;
+  font-size:24px; line-height:1; font-family:monospace}
+
+/* FINAL CALL OUT */
+.final{background:linear-gradient(135deg,rgba(248,113,113,0.08) 0%,rgba(212,160,86,0.05) 100%);
+  border:1px solid rgba(248,113,113,0.25); border-radius:16px; padding:48px 36px;
+  margin-top:48px; text-align:center}
+.final .badge{display:inline-block; padding:6px 16px; background:var(--red);
+  color:#1a1a1a; font-weight:700; font-size:12px; letter-spacing:0.15em;
+  text-transform:uppercase; border-radius:16px; margin-bottom:20px}
+.final h3{font-family:Georgia,serif; font-size:30px; margin-bottom:18px; color:var(--text)}
+.final p{font-size:17px; color:var(--text-muted); max-width:640px; margin:0 auto; line-height:1.8}
+.final strong{color:var(--gold-bright)}
+.final .pipeline{display:inline-flex; align-items:center; gap:8px; flex-wrap:wrap;
+  justify-content:center; margin-top:24px; font-family:monospace; font-size:14px}
+.final .pipeline .stage{padding:6px 14px; background:var(--surface-2);
+  border:1px solid var(--border); border-radius:16px; color:var(--text)}
+.final .pipeline .arrow{color:var(--gold)}
+
+/* FOOTER */
+footer{text-align:center; padding:48px 0 24px; color:var(--text-muted); font-size:13px;
+  border-top:1px solid var(--border); margin-top:48px}
+footer p{margin-bottom:8px}
+
+@media (max-width:700px){
+  body{padding:20px 12px; font-size:15px}
+  .hero{padding:40px 0 28px}
+  .hero .stats{gap:24px}
+  .phase{padding:24px}
+  .phase-title{font-size:26px}
+  .phase-title .sub{font-size:18px}
+  .phase-bg-num{font-size:130px; right:12px; top:-8px}
+  .final{padding:32px 20px}
+  .final h3{font-size:24px}
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- HERO -->
+<div class="hero">
+  <div class="emoji">🗺️</div>
+  <div class="eyebrow">Quant Learning Roadmap · 4 Phases</div>
+  <h1>量化学习四阶段路线图</h1>
+  <p class="subtitle">从金融通识到实盘交易 —— 一条给工程师的完整学习路径。<br>每一步都有明确目标、工具栈和验证标准。</p>
+  <div class="stats">
+    <div><strong>4</strong>阶段</div>
+    <div><strong>10–19</strong>周基础</div>
+    <div><strong>∞</strong>持续迭代</div>
+  </div>
+</div>
+
+<!-- TRACK -->
+<div class="roadmap-track">
+  <div class="step s1"><span class="dot"></span>01 · 地基</div>
+  <span class="arrow">→</span>
+  <div class="step s2"><span class="dot"></span>02 · 系统</div>
+  <span class="arrow">→</span>
+  <div class="step s3"><span class="dot"></span>03 · AI</div>
+  <span class="arrow">→</span>
+  <div class="step s4"><span class="dot"></span>04 · 实战</div>
+</div>
+
+<!-- PHASE 1 -->
+<section class="phase p1">
+  <div class="phase-bg-num">01</div>
+  <div class="phase-header">
+    <div class="phase-meta">
+      <span class="phase-tag">PHASE 01 · FOUNDATION</span>
+      <div class="phase-title">打地基<span class="sep">·</span><span class="sub">金融通识与数据工具</span></div>
+    </div>
+    <div class="phase-duration">⏱ 1–2 周</div>
+  </div>
+  <div class="phase-goal">
+    <div class="label">学习目标</div>
+    <p>理解市场基本规则，掌握核心数据处理工具。</p>
+  </div>
+  <div class="topics">
+    <div class="topic">
+      <div class="topic-head">
+        <div class="topic-icon">📊</div>
+        <h4>金融入门</h4>
+        <span class="topic-tag-lvl">通识</span>
+      </div>
+      <p>理解股票、ETF 等基本概念，弄懂 K 线、成交量、市盈率（PE）等术语。重点理解 A 股的 <strong style="color:var(--blue)">T+1 交易制度</strong>和<strong style="color:var(--blue)">涨跌停板规则</strong>。</p>
+    </div>
+    <div class="topic">
+      <div class="topic-head">
+        <div class="topic-icon">🐍</div>
+        <h4>Python 工具强化</h4>
+        <span class="topic-tag-lvl">技能</span>
+      </div>
+      <p>你肯定熟悉 Pandas 和 NumPy，现在可以重点关注其在金融数据分析中的应用。关键是习惯用<strong style="color:var(--blue)">"向量化运算"</strong>替代 for 循环来处理大规模时间序列数据。</p>
+    </div>
+  </div>
+  <div class="tools">
+    <span class="lbl">工具栈</span>
+    <span class="tool">Pandas</span>
+    <span class="tool">NumPy</span>
+    <span class="tool">向量化运算</span>
+    <span class="tool">K 线</span>
+    <span class="tool">PE</span>
+    <span class="tool">T+1</span>
+    <span class="tool">涨跌停</span>
+  </div>
+</section>
+
+<div class="arrow-sep">↓</div>
+
+<!-- PHASE 2 -->
+<section class="phase p2">
+  <div class="phase-bg-num">02</div>
+  <div class="phase-header">
+    <div class="phase-meta">
+      <span class="phase-tag">PHASE 02 · BUILD</span>
+      <div class="phase-title">建系统<span class="sep">·</span><span class="sub">回测框架与经典策略</span></div>
+    </div>
+    <div class="phase-duration">⏱ 3–5 周</div>
+  </div>
+  <div class="phase-goal">
+    <div class="label">学习目标</div>
+    <p>搭建第一个回测系统，实现并验证经典策略。</p>
+  </div>
+  <div class="topics">
+    <div class="topic">
+      <div class="topic-head">
+        <div class="topic-icon">🧰</div>
+        <h4>选择回测框架</h4>
+        <span class="topic-tag-lvl">工具</span>
+      </div>
+      <p>从 <strong style="color:var(--gold-bright)">Backtrader</strong> 或 <strong style="color:var(--gold-bright)">Zipline</strong>（或其国内版本 <strong style="color:var(--gold-bright)">Rqalpha</strong>）入手。它们能让你专注于策略逻辑。更现代的 <strong style="color:var(--gold-bright)">VectorBT</strong> 以速度快著称，也可以了解。</p>
+    </div>
+    <div class="topic">
+      <div class="topic-head">
+        <div class="topic-icon">📈</div>
+        <h4>实现经典策略</h4>
+        <span class="topic-tag-lvl">实战</span>
+      </div>
+      <p>动手实现<strong style="color:var(--gold-bright)">双均线策略</strong>、<strong style="color:var(--gold-bright)">海龟交易法则</strong>和<strong style="color:var(--gold-bright)">网格交易策略</strong>。目标不是靠它们赚钱，而是跑通"数据输入 → 策略信号 → 回测输出 → 绩效评估"的完整流程。</p>
+    </div>
+  </div>
+  <div class="tools">
+    <span class="lbl">工具栈</span>
+    <span class="tool">Backtrader</span>
+    <span class="tool">Zipline</span>
+    <span class="tool">Rqalpha</span>
+    <span class="tool">VectorBT</span>
+    <span class="tool">双均线</span>
+    <span class="tool">海龟</span>
+    <span class="tool">网格</span>
+  </div>
+</section>
+
+<div class="arrow-sep">↓</div>
+
+<!-- PHASE 3 -->
+<section class="phase p3">
+  <div class="phase-bg-num">03</div>
+  <div class="phase-header">
+    <div class="phase-meta">
+      <span class="phase-tag">PHASE 03 · AI / ML</span>
+      <div class="phase-title">玩 AI<span class="sep">·</span><span class="sub">AI/ML 在量化中的应用</span></div>
+    </div>
+    <div class="phase-duration">⏱ 6–12 周</div>
+  </div>
+  <div class="phase-goal">
+    <div class="label">学习目标</div>
+    <p>将 AI/ML 技能应用于金融场景，构建预测模型。</p>
+  </div>
+  <div class="topics">
+    <div class="topic">
+      <div class="topic-head">
+        <div class="topic-icon">🌱</div>
+        <h4>入门：传统 ML</h4>
+        <span class="topic-tag-lvl">入门</span>
+      </div>
+      <p>从 <strong style="color:var(--purple)">Scikit-learn</strong> 入手，将<strong style="color:var(--purple)">随机森林</strong>、<strong style="color:var(--purple)">XGBoost</strong> 等模型应用于因子合成或涨跌预测。</p>
+    </div>
+    <div class="topic">
+      <div class="topic-head">
+        <div class="topic-icon">🧠</div>
+        <h4>进阶：DL + RL</h4>
+        <span class="topic-tag-lvl">进阶</span>
+      </div>
+      <p>使用 <strong style="color:var(--purple)">TensorFlow / PyTorch</strong>，探索 <strong style="color:var(--purple)">LSTM</strong> 等模型进行时间序列预测。进阶可了解<strong style="color:var(--purple)">强化学习</strong>在优化交易参数上的应用。</p>
+    </div>
+    <div class="topic">
+      <div class="topic-head">
+        <div class="topic-icon">🤖</div>
+        <h4>前沿：AI Agent</h4>
+        <span class="topic-tag-lvl">前沿</span>
+      </div>
+      <p>了解如何构建一个由<strong style="color:var(--purple)">"AI 情报官"</strong>、<strong style="color:var(--purple)">"AI 策略员"</strong>等多角色协作的自动化系统。</p>
+    </div>
+  </div>
+  <div class="tools">
+    <span class="lbl">工具栈</span>
+    <span class="tool">Scikit-learn</span>
+    <span class="tool">XGBoost</span>
+    <span class="tool">TensorFlow</span>
+    <span class="tool">PyTorch</span>
+    <span class="tool">LSTM</span>
+    <span class="tool">强化学习</span>
+    <span class="tool">AI Agent</span>
+  </div>
+</section>
+
+<div class="arrow-sep">↓</div>
+
+<!-- PHASE 4 -->
+<section class="phase p4">
+  <div class="phase-bg-num">04</div>
+  <div class="phase-header">
+    <div class="phase-meta">
+      <span class="phase-tag">PHASE 04 · LIVE</span>
+      <div class="phase-title">上战场<span class="sep">·</span><span class="sub">模拟盘与实盘</span></div>
+    </div>
+    <div class="phase-duration">⏱ 持续进行</div>
+  </div>
+  <div class="phase-goal">
+    <div class="label">学习目标</div>
+    <p>连接实盘，用真金白银验证并迭代策略。</p>
+  </div>
+  <div class="topics">
+    <div class="topic">
+      <div class="topic-head">
+        <div class="topic-icon">🧪</div>
+        <h4>模拟盘验证</h4>
+        <span class="topic-tag-lvl">验证</span>
+      </div>
+      <p>在 <strong style="color:var(--green)">聚宽（JoinQuant）</strong>等平台用模拟盘检验策略，这是实战前的重要缓冲。</p>
+    </div>
+    <div class="topic">
+      <div class="topic-head">
+        <div class="topic-icon">⚙️</div>
+        <h4>连接实盘</h4>
+        <span class="topic-tag-lvl">实战</span>
+      </div>
+      <p>资金达到门槛后，可开通 <strong style="color:var(--green)">miniQMT</strong> 或 <strong style="color:var(--green)">Ptrade</strong> 进行实盘交易。</p>
+    </div>
+    <div class="topic">
+      <div class="topic-head">
+        <div class="topic-icon">🛡️</div>
+        <h4>风控第一</h4>
+        <span class="topic-tag-lvl">纪律</span>
+      </div>
+      <p>严格遵守<strong style="color:var(--green)">止盈止损纪律</strong>。永远先跑通<strong style="color:var(--green)">回测 → 模拟盘 → 小资金实盘</strong>的流程。</p>
+    </div>
+  </div>
+  <div class="tools">
+    <span class="lbl">工具栈</span>
+    <span class="tool">聚宽 JoinQuant</span>
+    <span class="tool">miniQMT</span>
+    <span class="tool">Ptrade</span>
+    <span class="tool">止盈止损</span>
+    <span class="tool">仓位管理</span>
+  </div>
+</section>
+
+<!-- FINAL CALLOUT -->
+<section class="final">
+  <div class="badge">⚠️ FUNDAMENTAL RULE</div>
+  <h3>风控第一，永远第一</h3>
+  <p>策略可以试错，本金不能熔断。<br>不管你在哪个阶段，都请遵守这条不可逾越的流水线：</p>
+  <div class="pipeline">
+    <span class="stage">回测</span>
+    <span class="arrow">→</span>
+    <span class="stage">模拟盘</span>
+    <span class="arrow">→</span>
+    <span class="stage">小资金实盘</span>
+    <span class="arrow">→</span>
+    <span class="stage">逐步加仓</span>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>🗺️ 量化学习四阶段路线图</p>
+  <p>从地基到实战 · 每一步都算数</p>
+  <p style="margin-top:18px; font-size:11px; opacity:0.6;">本路线图仅为学习路径建议，不构成任何投资建议。市场有风险，入局需谨慎。</p>
+</footer>
+
+</div>
+</body>
+</html>

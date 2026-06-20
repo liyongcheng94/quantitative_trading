@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>量化学习四阶段路线图 2.0 · 速览版</title>
+<style>
+:root{
+  --bg:#0d1117; --surface:#161b22; --surface-2:#1c2330;
+  --border:#2d3441; --text:#e6edf3; --text-muted:#8b949e;
+  --gold:#d4a056; --gold-bright:#f0c674;
+  --blue:#60a5fa; --purple:#c084fc; --green:#4ade80; --red:#f87171;
+}
+*{box-sizing:border-box; margin:0; padding:0}
+body{
+  background:var(--bg); color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  line-height:1.65; font-size:15px; padding:32px 20px;
+}
+.wrap{max-width:1200px; margin:0 auto}
+
+/* HERO（极简） */
+.hero{padding:24px 0 28px; text-align:center; margin-bottom:28px}
+.hero .eyebrow{font-family:"JetBrains Mono",Consolas,monospace; font-size:11px;
+  letter-spacing:0.2em; text-transform:uppercase; color:var(--gold); margin-bottom:10px}
+.hero h1{font-family:Georgia,"Source Han Serif SC",serif;
+  font-size:clamp(26px,3.6vw,38px); line-height:1.25; font-weight:700; margin-bottom:10px}
+.hero h1 .emoji{font-size:0.85em}
+.hero p{font-size:14px; color:var(--text-muted); max-width:560px; margin:0 auto}
+
+/* GRID（核心：4 列横向） */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:14px;
+  margin-bottom:28px;
+}
+
+/* PHASE CARD */
+.phase{background:var(--surface); border:1px solid var(--border);
+  border-radius:10px; padding:20px; display:flex; flex-direction:column;
+  border-top:3px solid varborder; position:relative}
+.phase.p1{border-top-color:var(--blue)}
+.phase.p2{border-top-color:var(--gold)}
+.phase.p3{border-top-color:var(--purple)}
+.phase.p4{border-top-color:var(--green)}
+
+.phase-num{position:absolute; top:14px; right:16px; font-family:Georgia,serif;
+  font-size:32px; font-weight:900; opacity:0.18; line-height:1}
+.phase.p1 .phase-num{color:var(--blue)}
+.phase.p2 .phase-num{color:var(--gold)}
+.phase.p3 .phase-num{color:var(--purple)}
+.phase.p4 .phase-num{color:var(--green)}
+
+.phase-name{font-family:Georgia,serif; font-size:19px; font-weight:700;
+  margin-bottom:2px; line-height:1.2}
+.phase-sub{font-size:12px; color:var(--text-muted); margin-bottom:12px; min-height:32px}
+
+.phase-dur{display:inline-block; padding:3px 10px; border-radius:12px;
+  font-family:monospace; font-size:11px; font-weight:600; margin-bottom:14px;
+  border:1px solid; align-self:flex-start}
+.phase.p1 .phase-dur{color:var(--blue); border-color:rgba(96,165,250,0.3); background:rgba(96,165,250,0.08)}
+.phase.p2 .phase-dur{color:var(--gold-bright); border-color:rgba(212,160,86,0.3); background:rgba(212,160,86,0.08)}
+.phase.p3 .phase-dur{color:var(--purple); border-color:rgba(192,132,252,0.3); background:rgba(192,132,252,0.08)}
+.phase.p4 .phase-dur{color:var(--green); border-color:rgba(74,222,128,0.3); background:rgba(74,222,128,0.08)}
+
+.phase-goal{font-size:12.5px; color:var(--text); padding:10px 12px;
+  background:var(--surface-2); border-radius:6px; margin-bottom:14px; line-height:1.55}
+.phase-goal .lbl{display:block; font-family:monospace; font-size:10px;
+  letter-spacing:0.1em; color:var(--text-muted); text-transform:uppercase; margin-bottom:3px}
+
+.phase-topics{list-style:none; padding:0; margin:0 0 14px; flex:1}
+.phase-topics li{font-size:12.5px; color:var(--text-muted); padding:5px 0 5px 18px;
+  position:relative; line-height:1.5; border-bottom:1px dashed var(--border)}
+.phase-topics li:last-child{border-bottom:none}
+.phase-topics li::before{content:"▸"; position:absolute; left:0; top:5px; font-size:11px}
+.phase.p1 .phase-topics li::before{color:var(--blue)}
+.phase.p2 .phase-topics li::before{color:var(--gold)}
+.phase.p3 .phase-topics li::before{color:var(--purple)}
+.phase.p4 .phase-topics li::before{color:var(--green)}
+.phase-topics li strong{color:var(--text); font-weight:600}
+
+.phase-tools{display:flex; flex-wrap:wrap; gap:4px; padding-top:10px;
+  border-top:1px solid var(--border)}
+.tool{padding:2px 8px; border-radius:10px; font-family:monospace;
+  font-size:10.5px; background:var(--surface-2); border:1px solid var(--border);
+  color:var(--text-muted)}
+.phase.p1 .tool{color:var(--blue); border-color:rgba(96,165,250,0.2)}
+.phase.p2 .tool{color:var(--gold-bright); border-color:rgba(212,160,86,0.2)}
+.phase.p3 .tool{color:var(--purple); border-color:rgba(192,132,252,0.2)}
+.phase.p4 .tool{color:var(--green); border-color:rgba(74,222,128,0.2)}
+
+/* FOOTER PIPELINE（精简版风控） */
+.pipeline-bar{background:linear-gradient(90deg,rgba(248,113,113,0.06),rgba(212,160,86,0.04));
+  border:1px solid rgba(248,113,113,0.2); border-radius:10px; padding:16px 20px;
+  display:flex; align-items:center; gap:12px; flex-wrap:wrap; justify-content:center}
+.pipeline-bar .tag{font-family:monospace; font-size:11px; padding:4px 10px;
+  background:var(--red); color:#1a1a1a; font-weight:700; border-radius:10px;
+  letter-spacing:0.1em; text-transform:uppercase}
+.pipeline-bar .pipe{display:flex; align-items:center; gap:6px; flex-wrap:wrap;
+  justify-content:center; font-family:monospace; font-size:12.5px}
+.pipeline-bar .stage{padding:4px 12px; background:var(--surface-2);
+  border:1px solid var(--border); border-radius:12px; color:var(--text)}
+.pipeline-bar .arrow{color:var(--gold); font-weight:700}
+.pipeline-bar .label{font-size:13px; color:var(--text-muted)}
+
+footer{text-align:center; padding:20px 0 4px; color:var(--text-muted);
+  font-size:11px; opacity:0.7}
+
+/* 响应式 */
+@media (max-width:960px){
+  .grid{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width:560px){
+  .grid{grid-template-columns:1fr}
+  body{padding:16px 10px; font-size:14px}
+  .phase{padding:18px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- HERO -->
+<div class="hero">
+  <div class="eyebrow">Quant Roadmap · v2.0 速览版</div>
+  <h1><span class="emoji">🗺️</span> 量化学习四阶段路线图</h1>
+  <p>从地基到实战 · 一张图看清完整路径</p>
+</div>
+
+<!-- 4 列横向 -->
+<div class="grid">
+
+  <!-- PHASE 1 -->
+  <div class="phase p1">
+    <span class="phase-num">01</span>
+    <div class="phase-name">打地基</div>
+    <div class="phase-sub">金融通识与数据工具</div>
+    <span class="phase-dur">⏱ 1–2 周</span>
+    <div class="phase-goal">
+      <span class="lbl">目标</span>
+      理解市场基本规则，掌握核心数据处理工具。
+    </div>
+    <ul class="phase-topics">
+      <li><strong>金融入门：</strong>股票、ETF、K 线、成交量、PE</li>
+      <li><strong>A 股特色：</strong>T+1 制度、涨跌停板</li>
+      <li><strong>Python 强化：</strong>Pandas / NumPy 金融场景应用</li>
+      <li><strong>核心习惯：</strong>向量化运算替代 for 循环</li>
+    </ul>
+    <div class="phase-tools">
+      <span class="tool">Pandas</span>
+      <span class="tool">NumPy</span>
+      <span class="tool">向量化</span>
+      <span class="tool">K 线</span>
+      <span class="tool">T+1</span>
+    </div>
+  </div>
+
+  <!-- PHASE 2 -->
+  <div class="phase p2">
+    <span class="phase-num">02</span>
+    <div class="phase-name">建系统</div>
+    <div class="phase-sub">回测框架与经典策略</div>
+    <span class="phase-dur">⏱ 3–5 周</span>
+    <div class="phase-goal">
+      <span class="lbl">目标</span>
+      搭建第一个回测系统，实现并验证经典策略。
+    </div>
+    <ul class="phase-topics">
+      <li><strong>回测框架：</strong>Backtrader / Zipline / Rqalpha</li>
+      <li><strong>速度优先：</strong>VectorBT 向量化回测</li>
+      <li><strong>经典策略：</strong>双均线、海龟、网格</li>
+      <li><strong>跑通闭环：</strong>数据 → 信号 → 回测 → 绩效</li>
+    </ul>
+    <div class="phase-tools">
+      <span class="tool">Backtrader</span>
+      <span class="tool">Zipline</span>
+      <span class="tool">Rqalpha</span>
+      <span class="tool">VectorBT</span>
+      <span class="tool">双均线</span>
+      <span class="tool">海龟</span>
+    </div>
+  </div>
+
+  <!-- PHASE 3 -->
+  <div class="phase p3">
+    <span class="phase-num">03</span>
+    <div class="phase-name">玩 AI</div>
+    <div class="phase-sub">AI/ML 在量化中的应用</div>
+    <span class="phase-dur">⏱ 6–12 周</span>
+    <div class="phase-goal">
+      <span class="lbl">目标</span>
+      将 AI/ML 技能应用于金融场景，构建预测模型。
+    </div>
+    <ul class="phase-topics">
+      <li><strong>传统 ML：</strong>Scikit-learn、随机森林、XGBoost</li>
+      <li><strong>应用场景：</strong>因子合成、涨跌预测</li>
+      <li><strong>深度学习：</strong>TF / PyTorch、LSTM 时序预测</li>
+      <li><strong>前沿探索：</strong>强化学习、多 Agent 协作</li>
+    </ul>
+    <div class="phase-tools">
+      <span class="tool">Scikit-learn</span>
+      <span class="tool">XGBoost</span>
+      <span class="tool">PyTorch</span>
+      <span class="tool">LSTM</span>
+      <span class="tool">RL</span>
+      <span class="tool">Agent</span>
+    </div>
+  </div>
+
+  <!-- PHASE 4 -->
+  <div class="phase p4">
+    <span class="phase-num">04</span>
+    <div class="phase-name">上战场</div>
+    <div class="phase-sub">模拟盘与实盘</div>
+    <span class="phase-dur">⏱ 持续进行</span>
+    <div class="phase-goal">
+      <span class="lbl">目标</span>
+      连接实盘，用真金白银验证并迭代策略。
+    </div>
+    <ul class="phase-topics">
+      <li><strong>模拟盘：</strong>聚宽 JoinQuant 检验</li>
+      <li><strong>实盘通道：</strong>miniQMT、Ptrade</li>
+      <li><strong>风控第一：</strong>止盈止损纪律</li>
+      <li><strong>流程红线：</strong>回测 → 模拟 → 小资金</li>
+    </ul>
+    <div class="phase-tools">
+      <span class="tool">聚宽</span>
+      <span class="tool">miniQMT</span>
+      <span class="tool">Ptrade</span>
+      <span class="tool">止盈止损</span>
+      <span class="tool">仓位管理</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- 风控流水线（精简） -->
+<div class="pipeline-bar">
+  <span class="tag">⚠️ 风控红线</span>
+  <span class="label">无论哪个阶段，都必须按顺序走：</span>
+  <div class="pipe">
+    <span class="stage">回测</span>
+    <span class="arrow">→</span>
+    <span class="stage">模拟盘</span>
+    <span class="arrow">→</span>
+    <span class="stage">小资金实盘</span>
+    <span class="arrow">→</span>
+    <span class="stage">逐步加仓</span>
+  </div>
+</div>
+
+<footer>
+  🗺️ 量化学习四阶段路线图 · 速览版 v2.0 · 仅供学习交流，不构成投资建议
+</footer>
+
+</div>
+</body>
+</html>
