@@ -20,7 +20,8 @@ DEFAULT_END = "2024-12-31"
 
 
 def _cache_path(code: str, adjust: str) -> Path:
-    return DATA_DIR / f"{code}_{adjust}.parquet"
+    suffix = adjust if adjust else "raw"
+    return DATA_DIR / f"{code}_{suffix}.parquet"
 
 
 def _to_sina_symbol(code: str) -> str:

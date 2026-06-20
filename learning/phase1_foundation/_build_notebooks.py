@@ -120,7 +120,12 @@ def build_l00() -> None:
 
         code("""
         import sys
-        sys.path.insert(0, "..")  # 让 learning/phase1_foundation/ 下的模块可被导入
+        from pathlib import Path
+
+        # 自动定位 phase1_foundation 目录（无论 jupyter lab 从项目根还是从这里启动）
+        _cwd = Path.cwd()
+        _p1 = _cwd if (_cwd / '_data.py').exists() else (_cwd / 'learning' / 'phase1_foundation')
+        sys.path.insert(0, str(_p1))
 
         import pandas as pd
         import numpy as np
@@ -284,9 +289,9 @@ def build_l01() -> None:
 
         | 板块 | 普通股 | ST 股（特别处理） | 新股首日 |
         |------|-------|-------------------|--------|
-        | 主板（沪/深） | ±10% | ±5% | 无限制（44% 常见） |
-        | 创业板 / 科创板 | ±20% | ±20% | 无限制 |
-        | 北交所 | ±30% | — | 无限制 |
+        | 主板（沪/深） | ±10% | ±5% | 前 5 日无限制（2023 注册制改革后；老规则 +44% 已废止） |
+        | 创业板 / 科创板 | ±20% | ±20% | 前 5 日无限制 |
+        | 北交所 | ±30% | ±30% | 无限制 |
 
         **新手陷阱**：
         - 涨停 = 收盘价 ≈ 前一日收盘 × 1.10（不是 1.11，不能四舍五入）
@@ -317,7 +322,12 @@ def build_l01() -> None:
 
         code("""
         import sys
-        sys.path.insert(0, "..")
+        from pathlib import Path
+
+        # 自动定位 phase1_foundation 目录（无论 jupyter lab 从项目根还是从这里启动）
+        _cwd = Path.cwd()
+        _p1 = _cwd if (_cwd / '_data.py').exists() else (_cwd / 'learning' / 'phase1_foundation')
+        sys.path.insert(0, str(_p1))
 
         import pandas as pd
         import numpy as np

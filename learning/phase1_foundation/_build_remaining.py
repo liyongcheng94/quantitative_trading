@@ -39,7 +39,15 @@ def write_ex(filename: str, body: str) -> None:
 def common_imports() -> str:
     return """
         import sys
-        sys.path.insert(0, "..")
+        from pathlib import Path
+
+        # 自动定位 phase1_foundation 目录 + project root（兼容两种 jupyter 启动位置）
+        _cwd = Path.cwd()
+        _p1 = _cwd if (_cwd / '_data.py').exists() else (_cwd / 'learning' / 'phase1_foundation')
+        sys.path.insert(0, str(_p1))
+        _proj = _p1.parent.parent if _p1.name == 'phase1_foundation' else _p1
+        if (_proj / 'qtrader' / '__init__.py').exists():
+            sys.path.insert(0, str(_proj))
 
         import numpy as np
         import pandas as pd
@@ -139,6 +147,15 @@ def build_l02() -> None:
         code("""
         import mplfinance as mpf
 
+        # 自定义 A 股配色（红涨绿跌，与美股相反）
+        a_share_style = mpf.make_mpf_style(
+            base_mpf_style='charles',
+            marketcolors=mpf.make_marketcolors(up='#e74c3c', down='#27ae60',
+                                                edge='inherit', wick='inherit',
+                                                volume='inherit'),
+            rc={'font.sans-serif': ['Microsoft YaHei']},
+        )
+
         # mplfinance 要求 DataFrame 的 index 是 DatetimeIndex，列名是 Open/High/Low/Close/Volume
         df = byd.set_index('date').rename(columns={
             'open': 'Open', 'high': 'High', 'low': 'Low',
@@ -146,12 +163,13 @@ def build_l02() -> None:
         })
         # 取最近 60 个交易日
         df_recent = df.tail(60)
-        mpf.plot(df_recent, type='candle', style='charles',
-                 title='比亚迪 近 60 日 K 线', volume=True, mav=(5, 20))
+        mpf.plot(df_recent, type='candle', style=a_share_style,
+                 title='比亚迪 近 60 日 K 线（A 股配色：红涨绿跌）',
+                 volume=True, mav=(5, 20))
         """),
 
         md("""
-        `style='charles'` 是美股风格（绿涨红跌）。A 股风格需要自定义 `mpf_style`，后面练习你可以试。
+        **A 股配色**：红涨绿跌（与美股相反）。上面用 `mpf.make_marketcolors(up='#e74c3c', down='#27ae60')` 自定义。
         """),
 
         md("""
@@ -462,7 +480,7 @@ def build_l03() -> None:
 
         fig, axes = plt.subplots(3, 1, figsize=(10, 6), sharex=True)
         demo.plot(ax=axes[0], title='原始（含 NaN）', color='gray')
-        demo.fillna(method='ffill').plot(ax=axes[1], title='ffill（用前一日填充）', color='blue')
+        demo.ffill().plot(ax=axes[1], title='ffill（用前一日填充）', color='blue')
         demo.interpolate().plot(ax=axes[2], title='interpolate（线性插值）', color='red')
         plt.tight_layout(); plt.show()
         """),
@@ -470,7 +488,7 @@ def build_l03() -> None:
         md("""
         **何时用哪个？**
         - `fillna(0)`：成交量 0 是真实的（停牌没成交），用这个
-        - `fillna(method='ffill')`：价格停牌期间"沿用前一日"，回测常用
+        - `.ffill()`（forward fill）：价格停牌期间"沿用前一日"，回测常用
         - `interpolate()`：图形平滑用，**回测不能用**（会有未来函数嫌疑）
         - `dropna()`：直接删掉，适合"不关心这段"的统计分析
         """),
@@ -983,6 +1001,10 @@ def build_l05() -> None:
         def find_limit_ups(df: pd.DataFrame, threshold: float = 0.099) -> pd.DataFrame:
             \"\"\"识别涨停日 + 一字板。
 
+            ⚠️ 严格涨停识别应用「不复权」数据（raw）。本函数用 qfq 数据，
+            除权日可能轻微误判（qfq 会把除权日"缺口"补回去，导致 chg_pct
+            虚高）。教学场景可接受，实战回测请传 adjust="" 的数据。
+
             Returns:
                 DataFrame index=date，列 [close, prev_close, chg_pct, is_yizi]
                 is_yizi=True 表示一字涨停（开盘=最高=最低=收盘）
@@ -1180,13 +1202,13 @@ def build_l06() -> None:
         - **夏普比率 = (μ - rf) / σ**：单位风险的超额回报（rf = 无风险利率，A 股常用 3%）
         - 夏普 > 1：不错；> 2：优秀；> 3：可疑（要排查未来函数）
 
-        ### A 股交易成本三件套
+        ### A 股交易成本三件套（2026 现行）
         | 项目 | 费率 | 收费方 | 双向？ |
         |------|------|-------|--------|
-        | 佣金 | 万 2.5（券商可谈，最低万 1） | 券商 | 双向（买卖都收） |
+        | 佣金 | 行业平均 **万 2.1**（券商可谈到 **万 1 免 5**） | 券商 | 双向 |
         | 印花税 | **卖**方 0.05%（2023.8.28 起） | 国家 | 仅卖出 |
-        | 过户费 | 0.001%（沪深都有） | 中登公司 | 双向 |
-        | 最低佣金 | 5 元（不足 5 元按 5 元收） | 券商 | 双向 |
+        | 过户费 | 0.001%（沪深统一，2022.4.29 起） | 中登公司 | 双向 |
+        | ~~最低佣金 5 元~~ | 部分券商已"免 5"（不足 5 元按实际收） | 券商 | 双向 |
 
         ### 滑点（slippage）
         你下单时看到的价格 ≠ 实际成交价。原因：盘口变化、流动性不足。
@@ -1196,10 +1218,13 @@ def build_l06() -> None:
 
         回测一般保守按 **0.1% 滑点** 额外扣除。
 
-        ### 单边 vs 双边总成本
-        - 单边（买或卖）：佣金 0.025% + 过户费 0.001% + 滑点 0.1% = **约 0.13%**
-        - 双边（买卖来回）：上面 × 2 + 印花税 0.05% = **约 0.31%**
+        ### 单边 vs 双边总成本（关键数字，以万 2.5 佣金为保守估计）
+        - **买入单边**：佣金 0.025% + 过户费 0.001% + 滑点 0.1% = **约 0.13%**
+        - **卖出单边**：上面 + 印花税 0.05% = **约 0.18%**（卖出多一道税）
+        - **双边来回**：0.13% + 0.18% = **约 0.31%**
         - 高频策略每多 1 次调仓，先扣 0.31% 再算收益。**这是策略亏钱的常见原因**。
+        - 若你的券商给到"万 1 免 5"（2026 主流），单边佣金可降到 0.01%，双边总成本降到 **约 0.25%**。
+        - `apply_trading_cost` 默认用万 2.5 + 最低 5 元（保守），未实现"免 5"实际。
         """),
 
         code(common_imports()),
@@ -1218,7 +1243,9 @@ def build_l06() -> None:
         print(f"  方差:           {rets.var()*1e6:>7.1f}（×1e6）")
         print(f"  年化均值:       {rets.mean()*252*100:>7.2f}%")
         print(f"  年化波动:       {rets.std()*np.sqrt(252)*100:>7.2f}%")
-        print(f"  夏普（rf=3%）:  {(rets.mean()*252 - 0.03) / (rets.std()*np.sqrt(252)):>7.2f}")
+        # 2026 年中国 10 年期国债 ~1.75%，老教材常用 3% 偏高
+        rf = 0.0175
+        print(f"  夏普（rf={rf*100:.2f}%）:  {(rets.mean()*252 - rf) / (rets.std()*np.sqrt(252)):>7.2f}")
         """),
 
         md("""
@@ -1581,7 +1608,12 @@ def build_l07() -> None:
 
         code("""
         def compute_rsi(prices: pd.Series, period: int = 14) -> pd.Series:
-            \"\"\"经典 RSI 实现。\"\"\"
+            \"\"\"RSI 实现（SMA 简化版）。
+
+            注意：通达信/同花顺默认用 Wilder's RSI（用 EMA-like 递推平滑），
+            数值上与本函数略有差异。教学版用 SMA 已足够；实战对照行情软件
+            时记得这个口径差。
+            \"\"\"
             delta = prices.diff()
             gain = delta.where(delta > 0, 0).rolling(period).mean()
             loss = (-delta.where(delta < 0, 0)).rolling(period).mean()
@@ -1632,9 +1664,7 @@ def build_l07() -> None:
         """),
 
         code("""
-        # qtrader 已实现的 DualMA 策略
-        import sys
-        sys.path.insert(0, "../..")  # 让 qtrader 包可导入
+        # qtrader 已实现的 DualMA 策略（common_imports 已把 project root 加入 sys.path）
         from qtrader.strategies import DualMAStrategy
         from qtrader.engine import BacktestEngine
 
@@ -2109,6 +2139,9 @@ def build_l09() -> None:
         - 用向量化 → 几秒到几十秒
 
         **Python 慢的本质**：每个操作都要经过解释器、类型检查、动态分发。NumPy 用 C 实现，绕过这些开销。
+
+        ### ⚠️ 监管提示（2025.7.7 起）
+        中国证监会《程序化交易管理实施细则》已正式实施：每秒申报 ≥ 300 笔或单日笔数较高的，认定为**高频交易**，监管对其收取差异化收费、加强监测。**向量化提速用于研究与回测没问题**，但真要上实盘"刷单"，请先确认符合监管要求。Phase 1 的内容全部限于研究与回测范畴。
 
         ### 核心原则
         > **永远优先使用 Pandas/NumPy 的"整列运算"，不要 for 循环遍历行。**
