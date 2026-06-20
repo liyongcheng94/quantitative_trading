@@ -5,3 +5,9 @@ akshare>=1.12.0
 pandas>=2.0.0
 numpy>=1.24.0
 matplotlib>=3.7.0
+
+# 学习模块（learning/）额外依赖
+jupyterlab>=4.0.0
+mplfinance>=0.12.10b0
+seaborn>=0.13.0
+pyarrow>=14.0.0
