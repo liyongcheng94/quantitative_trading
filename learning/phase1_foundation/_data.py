@@ -6,6 +6,7 @@
 from __future__ import annotations
 
 import time
+from datetime import date
 from pathlib import Path
 from typing import Optional
 
@@ -16,7 +17,7 @@ DATA_DIR = Path(__file__).parent / "data"
 DATA_DIR.mkdir(exist_ok=True)
 
 DEFAULT_START = "2022-01-01"
-DEFAULT_END = "2024-12-31"
+DEFAULT_END = date.today().isoformat()  # 动态取今天，保证数据永远最新
 
 
 def _cache_path(code: str, adjust: str) -> Path:

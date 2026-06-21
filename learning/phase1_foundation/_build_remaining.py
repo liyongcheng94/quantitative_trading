@@ -213,14 +213,14 @@ def build_l02() -> None:
         md("""
         ## 第 5 段：随堂小练
 
-        ### 小练：找比亚迪 2024 年最大单日涨幅日的 K 线
+        ### 小练：找比亚迪最近一年最大单日涨幅日的 K 线
         用 mplfinance 画出那一天 ±10 个交易日的 K 线图（共 21 根），观察"最大涨幅日"长什么样。
         """),
 
         code("""
         # TODO: 你的代码（约 5 行）
         # 提示：
-        # 1) 筛出 2024 年的 byd 子集
+        # 1) 筛出最近一年的 byd 子集
         # 2) idx = sub['chg_pct'].idxmax() 找到最大涨幅日的行号
         # 3) 用 .iloc 取 ±10 范围
         # 4) 转 mplfinance 格式后画图
@@ -234,8 +234,8 @@ def build_l02() -> None:
 
         ### 📝 `exercises/ex02.py`
         1. 写函数 `find_doji(df, tol=0.005)`：找出"十字星"（open 与 close 差异 < tol × close）的日期列表
-        2. 用 mplfinance 画比亚迪 2024 全年 K 线 + 20 日均线 + 成交量，保存为 PNG
-        3. 统计比亚迪 2022-2024 每月"大阳线（涨幅>5%）"出现次数，画月度柱状图
+        2. 用 mplfinance 画比亚迪最近一年 K 线 + 20 日均线 + 成交量，保存为 PNG
+        3. 统计比亚迪 2022 至今每月"大阳线（涨幅>5%）"出现次数，画月度柱状图
 
         ### 🔮 下节 L03：量价关系 + 聚合
         成交量是 K 线之外的另一根主线。学 `resample` / `rolling` / 双轴图 + 换手率概念。
@@ -287,14 +287,14 @@ def build_ex02() -> None:
 
 
         # ---------- 题 2 ----------
-        def plot_byd_2024(save_path: str = "data/byd_2024.png") -> str:
-            \"\"\"画比亚迪 2024 全年 K 线 + 20 日均线 + 成交量。
+        def plot_byd_recent_year(save_path: str = "data/byd_recent_year.png") -> str:
+            \"\"\"画比亚迪最近一年 K 线 + 20 日均线 + 成交量。
 
             Returns:
                 保存的文件路径
             \"\"\"
             # TODO: ~8 行
-            # 提示：mpf.plot(df_2024, type='candle', mav=20, volume=True, savefig=save_path)
+            # 提示：mpf.plot(df_recent_year, type='candle', mav=20, volume=True, savefig=save_path)
 
 
 
@@ -327,11 +327,11 @@ def build_ex02() -> None:
 
             print("=" * 60); print("题 1：十字星"); print("=" * 60)
             dojis = find_doji(byd)
-            print(f"比亚迪 2022-2024 共 {len(dojis)} 个十字星")
+            print(f"比亚迪 2022 至今共 {len(dojis)} 个十字星")
             print("前 5 个日期：", [d.date() for d in dojis[:5]])
 
-            print(); print("=" * 60); print("题 2：2024 K 线图"); print("=" * 60)
-            path = plot_byd_2024()
+            print(); print("=" * 60); print("题 2：最近一年 K 线图"); print("=" * 60)
+            path = plot_byd_recent_year()
             print(f"已保存: {path}")
 
             print(); print("=" * 60); print("题 3：月度大阳线次数"); print("=" * 60)
@@ -516,7 +516,7 @@ def build_l03() -> None:
         ### 📝 `exercises/ex03.py`
         1. 写 `monthly_stats(df)` 返回每月（open first / high max / low min / close last / volume sum / 涨跌幅 %）的 DataFrame
         2. 写 `rolling_sharpe(df, window=20)` 简单版夏普（每日收益 mean / std × sqrt(252)）的滚动序列
-        3. 对比比亚迪 2024 年 MA20 上穿 MA60（金叉）与下穿（死叉）的次数，标出每次日期
+        3. 对比比亚迪最近一年 MA20 上穿 MA60（金叉）与下穿（死叉）的次数，标出每次日期
 
         ### 🔮 下节 L04：数据清洗 + 复权 + 多股对齐
         本节最硬核（75-90 min）。你将理解为什么"不复权" K 线会有假跳空、为什么多股对比必须先对齐日期。
@@ -607,7 +607,7 @@ def build_ex03() -> None:
 
             print(); print("=" * 60); print("题 3：金叉死叉"); print("=" * 60)
             c = find_crossings(byd)
-            print(f"比亚迪 2022-2024：金叉 {len(c['golden'])} 次，死叉 {len(c['death'])} 次")
+            print(f"比亚迪 2022 至今：金叉 {len(c['golden'])} 次，死叉 {len(c['death'])} 次")
             print("金叉日期：", [d.date() for d in c['golden'][:5]])
 
 
@@ -1036,7 +1036,7 @@ def build_l05() -> None:
         code("""
         # TODO: 你的代码（约 6 行）
         # 对 002594 / 002602 / 002624 三只股票
-        # 用 (1+ret).cumprod()-1 算 2024 全年累计收益率
+        # 用 (1+ret).cumprod()-1 算最近一年累计收益率
         # 按收益从高到低排名打印
 
 
@@ -1062,7 +1062,7 @@ def build_l05() -> None:
         ### 📝 `exercises/ex05.py`
         1. 写 `find_one_word_limit_ups(df, threshold=0.099, eps=0.001)` 返回一字涨停日列表
         2. 写 `annualized_return_with_costs(df, cost_bps=10)`：扣除每笔交易成本（L06 讲）后的年化
-        3. 对三股计算 2022-2024 每年"涨停日数 + 年化收益率"，做一张 3×3 的透视表
+        3. 对三股计算 2022 至今每年"涨停日数 + 年化收益率"，做一张 3×3 的透视表
 
         ### 🔮 下节 L06：统计基础 + 交易成本
         量化必备的"风险度量"：均值、方差、标准差、相关系数。同时讲清交易成本如何拖垮策略。
@@ -1779,7 +1779,7 @@ def build_l07() -> None:
         ## 第 7 段：随堂小练
 
         ### 小练：实现 EMA 交叉策略
-        用 EMA12 上穿 EMA26 作为买入信号，下穿作为卖出，跑比亚迪 2022-2024 的回测。
+        用 EMA12 上穿 EMA26 作为买入信号，下穿作为卖出，跑比亚迪 2022 至今的回测。
         """),
 
         code("""
@@ -2560,7 +2560,7 @@ def build_l10() -> None:
         1. **基本信息卡片**：股票名/代码/行业/当前价/总市值（可省）
         2. **K 线图**：mplfinance 近 1 年 K 线 + MA20 + 成交量
         3. **量价分析**：价格 + 成交量双轴图 + 量价关系点评
-        4. **涨跌停统计**：2024 年涨停日数、一字板数、最大单日涨幅
+        4. **涨跌停统计**：最近一年涨停日数、一字板数、最大单日涨幅
         5. **收益率曲线**：累计收益 vs 买入持有 + 年化 + 最大回撤
         6. **PE 历史**：PE 曲线 + 分位线 + 当前估值结论
         7. **简单回测**：调 qtrader DualMA 策略 + 三组参数对比
@@ -2587,7 +2587,7 @@ def build_l10() -> None:
         # ====== 项目参数（自选）======
         TARGET_CODE = "002594"   # 改成你要分析的股票
         TARGET_NAME = "比亚迪"
-        REPORT_YEAR = 2024
+        REPORT_YEAR = df["date"].dt.year.max()  # 动态取最新完整年
         OUTPUT_HTML = f"capstone_{TARGET_CODE}.html"
 
         # 拉数据（已在 L01 缓存）
@@ -2632,7 +2632,7 @@ def build_l10() -> None:
 
         code("""
         # TODO: 复用 L05 的 find_limit_ups 函数
-        # 统计 2024 年涨停日数 + 一字板数 + 最大单日涨幅日（日期、涨幅、K 线形态）
+        # 统计最近一年涨停日数 + 一字板数 + 最大单日涨幅日（日期、涨幅、K 线形态）
         """),
 
         md("""

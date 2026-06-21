@@ -71,7 +71,7 @@ def run_all() -> None:
 
     print(); print("=" * 60); print("题 3：金叉死叉"); print("=" * 60)
     c = find_crossings(byd)
-    print(f"比亚迪 2022-2024：金叉 {len(c['golden'])} 次，死叉 {len(c['death'])} 次")
+    print(f"比亚迪 2022 至今：金叉 {len(c['golden'])} 次，死叉 {len(c['death'])} 次")
     print("金叉日期：", [d.date() for d in c['golden'][:5]])
 
 

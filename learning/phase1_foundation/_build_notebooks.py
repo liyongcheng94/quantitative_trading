@@ -408,7 +408,7 @@ def build_l01() -> None:
 
         # 找出涨幅 >= 9.9% 的日子（主板涨停）
         limit_up = byd[byd["chg_pct"] >= 0.099].copy()
-        print(f"比亚迪 2022–2024 共 {len(limit_up)} 个涨停日")
+        print(f"比亚迪 2022 至今共 {len(limit_up)} 个涨停日")
         limit_up[["date", "close", "prev_close", "chg_pct_pct"]]
         """),
 
@@ -422,7 +422,7 @@ def build_l01() -> None:
         md("""
         ## 第 4 段：随堂小练
 
-        ### 小练 1：找比亚迪 2024 年最大单日涨幅日
+        ### 小练 1：找比亚迪最近一年最大单日涨幅日
         在下面 cell 里写代码，找出 `chg_pct` 最大的那一天，打印日期、收盘价、涨幅。
         """),
 
@@ -464,7 +464,7 @@ def build_l01() -> None:
 
         1. 拉取 `600519` 贵州茅台最近 1 年数据，计算期间最高价/最低价/平均成交量
         2. 写一个函数 `count_limit_up(df, threshold=0.099)`：输入任意股票 DataFrame，返回涨停日数（不要在函数里打印，return 一个 int）
-        3. 给三只股票（比亚迪/世纪华通/完美世界）2024 年的"涨停日数 + 平均日成交量"做一张对比表（DataFrame）
+        3. 给三只股票（比亚迪/世纪华通/完美世界）最近一年的"涨停日数 + 平均日成交量"做一张对比表（DataFrame）
 
         完成后让我审阅打分 ⭐⭐⭐。
 
@@ -556,7 +556,7 @@ def build_ex01() -> None:
 
         # ---------- 题 3 ----------
         def compare_three_stocks() -> pd.DataFrame:
-            \"\"\"对三只股票 2024 年做对比表。
+            \"\"\"对三只股票最近一年做对比表。
 
             Returns:
                 DataFrame，index 为股票名，列为 ['涨停日数', '平均日成交量', '年化波动率(%)']
@@ -593,7 +593,7 @@ def build_ex01() -> None:
 
             print()
             print("=" * 60)
-            print("题 3：三股 2024 年对比表")
+            print("题 3：三股最近一年对比表")
             print("=" * 60)
             print(compare_three_stocks())
 

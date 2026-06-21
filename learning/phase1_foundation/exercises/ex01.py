@@ -60,7 +60,7 @@ def count_limit_up(df: pd.DataFrame, threshold: float = 0.099) -> int:
 
 # ---------- 题 3 ----------
 def compare_three_stocks() -> pd.DataFrame:
-    """对三只股票 2024 年做对比表。
+    """对三只股票最近一年做对比表。
 
     Returns:
         DataFrame，index 为股票名，列为 ['涨停日数', '平均日成交量', '年化波动率(%)']
@@ -97,7 +97,7 @@ def run_all() -> None:
 
     print()
     print("=" * 60)
-    print("题 3：三股 2024 年对比表")
+    print("题 3：三股最近一年对比表")
     print("=" * 60)
     print(compare_three_stocks())
 

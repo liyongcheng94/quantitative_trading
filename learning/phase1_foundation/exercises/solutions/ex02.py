@@ -47,23 +47,24 @@ def find_doji(df: pd.DataFrame, tol: float = 0.005) -> list[pd.Timestamp]:
 
 
 # ---------- 题 2 ----------
-def plot_byd_2024(save_path: str = "data/byd_2024.png") -> str:
-    """画比亚迪 2024 全年 K 线 + 20 日均线 + 成交量。
+def plot_byd_recent_year(save_path: str = "data/byd_recent_year.png") -> str:
+    """画比亚迪最近一年 K 线 + 20 日均线 + 成交量。
 
     Returns:
         保存的文件路径
     """
     df = get_stock_data("002594").copy()
     df["date"] = pd.to_datetime(df["date"])
-    df_2024 = df[df["date"].dt.year == 2024].set_index("date")
+    latest_year = df["date"].dt.year.max()
+    df_recent_year = df[df["date"].dt.year == latest_year].set_index("date")
 
     # mplfinance 要求列名严格 OHLCV + DatetimeIndex
     mpf.plot(
-        df_2024,
+        df_recent_year,
         type="candle",
         mav=20,
         volume=True,
-        title="比亚迪 2024 K 线 + MA20",
+        title=f"比亚迪 {latest_year} K 线 + MA20",
         style="charles",  # mplfinance 内置样式，中文标题字体由 _style 处理
         savefig=save_path,
     )
@@ -100,14 +101,14 @@ def run_all() -> None:
     print("=" * 60)
     byd = get_stock_data("002594")
     dojis = find_doji(byd)
-    print(f"比亚迪 2022-2024 共 {len(dojis)} 个十字星")
+    print(f"比亚迪 2022 至今共 {len(dojis)} 个十字星")
     print("前 5 个日期：", [d.date() for d in dojis[:5]])
 
     print()
     print("=" * 60)
-    print("题 2：2024 K 线图")
+    print("题 2：最近一年 K 线图")
     print("=" * 60)
-    path = plot_byd_2024()
+    path = plot_byd_recent_year()
     print(f"已保存: {path}")
 
     print()

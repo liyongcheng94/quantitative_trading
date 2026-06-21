@@ -65,7 +65,7 @@ def compare_three_stocks(
     codes: list[str] | None = None,
     names: list[str] | None = None,
 ) -> pd.DataFrame:
-    """三只股票 2024 年对比表。
+    """三只股票最近一年对比表。
 
     Args:
         codes: 默认 002594 / 002602 / 002624
@@ -84,20 +84,19 @@ def compare_three_stocks(
     rows = []
     for code in codes:
         df = get_stock_data(code)
-        # 只保留 2024 年
-        df_2024 = df[df["date"].dt.year == 2021 + 3] if "date" in df.columns else df
-        # 上面写法过于巧妙，直接用 pd.to_datetime 后 filter
+        # 只保留最近一年（动态取 max year）
         df_dt = df.copy()
         if "date" in df_dt.columns:
             df_dt["date"] = pd.to_datetime(df_dt["date"])
-            df_2024 = df_dt[df_dt["date"].dt.year == 2024]
+            latest_year = df_dt["date"].dt.year.max()
+            df_recent = df_dt[df_dt["date"].dt.year == latest_year]
         else:
-            df_2024 = df_dt
+            df_recent = df_dt
 
-        chg = df_2024["close"].pct_change().dropna()
+        chg = df_recent["close"].pct_change().dropna()
         rows.append({
-            "涨停天数": count_limit_up(df_2024),
-            "平均日成交量": float(df_2024["volume"].mean()),
+            "涨停天数": count_limit_up(df_recent),
+            "平均日成交量": float(df_recent["volume"].mean()),
             "年化波动率(%)": float(chg.std() * (252 ** 0.5) * 100),
         })
 
@@ -123,7 +122,7 @@ def run_all() -> None:
 
     print()
     print("=" * 60)
-    print("题 3：三股 2024 年对比表")
+    print("题 3：三股最近一年对比表")
     print("=" * 60)
     print(compare_three_stocks())
 
