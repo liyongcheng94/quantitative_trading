@@ -5,6 +5,7 @@ from typing import Optional
 
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+import numpy as np
 
 from .engine import BacktestResult
 
@@ -15,30 +16,35 @@ _COLORS = ["#e74c3c", "#9b59b6", "#27ae60", "#f39c12", "#3498db"]
 
 
 def print_comparison_table(results: list[BacktestResult], code: str) -> None:
-    print("\n" + "=" * 96)
+    print("\n" + "=" * 112)
     print(f" 多策略对比  | 股票: {code}")
-    print("=" * 96)
+    print("=" * 112)
     header = (
         f"{'策略':<14} {'总收益':>10} {'年化':>10} "
-        f"{'最大回撤':>10} {'夏普':>8} {'Calmar':>8} "
-        f"{'波动率':>8} {'交易次数':>8}"
+        f"{'最大回撤':>10} {'夏普':>8} {'Sortino':>8} "
+        f"{'Calmar':>8} {'波动率':>8} {'胜率':>8} {'交易次数':>8}"
     )
     print(header)
-    print("-" * 96)
+    print("-" * 112)
 
     bench = results[0].metrics["bench_total_return"]
-    print(f"{'买入持有':<14} {bench:>10.2%} {'':>10} {'':>10} {'':>8} {'':>8} {'':>8} {'':>8}")
+    print(
+        f"{'买入持有':<14} {bench:>10.2%} {'':>10} {'':>10} "
+        f"{'':>8} {'':>8} {'':>8} {'':>8} {'':>8} {'':>8}"
+    )
 
     for r in results:
         m = r.metrics
+        sortino_str = f"{m['sortino']:>8.3f}" if not np.isnan(m["sortino"]) else f"{'NaN':>8}"
+        win_str = f"{m['win_rate']:>8.2%}" if not np.isnan(m["win_rate"]) else f"{'NaN':>8}"
         print(
             f"{r.strategy_name:<14} "
             f"{m['total_return']:>10.2%} {m['ann_return']:>10.2%} "
             f"{m['max_drawdown']:>10.2%} {m['sharpe']:>8.3f} "
-            f"{m['calmar']:>8.3f} {m['volatility']:>8.2%} "
-            f"{r.n_trades:>8}"
+            f"{sortino_str} {m['calmar']:>8.3f} {m['volatility']:>8.2%} "
+            f"{win_str} {r.n_trades:>8}"
         )
-    print("=" * 96 + "\n")
+    print("=" * 112 + "\n")
 
 
 def plot_comparison(

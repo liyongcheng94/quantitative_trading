@@ -1354,7 +1354,104 @@ def build_l06() -> None:
         """),
 
         md("""
-        ## 第 6 段：随堂小练
+        ## 第 6 段：超越夏普——更多风险指标
+
+        ### 为什么 Sharpe 不够？
+夏普的"σ"是**双侧波动**（上下都算）。但投资者对"涨得猛"和"跌得狠"的痛感是不对称的：
+- 涨 50% 是好事（不应该被惩罚）
+- 跌 50% 是灾难（应该重点惩罚）
+
+**Sortino 比率**把分子不变，分母换成"下行偏差"（只算亏损日的波动），更贴近真实痛感。
+
+### 量化人必懂的 5 个指标（2026 版）
+| 指标 | 公式 | 含义 | 判断阈值 |
+|------|------|------|---------|
+| **Sharpe** | (μ-rf)/σ_全样本 | 单位总风险的超额收益 | >1 不错, >2 优秀 |
+| **Sortino** | (μ-rf)/σ_下行 | 单位**下行风险**的超额收益 | >2 合格, >3 优秀 |
+| **Calmar** | 年化收益/\\|最大回撤\\| | 回撤效率 | >1 良好, >3 优秀 |
+| **胜率** | 正收益日/总交易日 | 赢天比例 | 40-55% 正常, >60% 高手 |
+| **盈亏比** | 总盈利/总亏损（绝对值） | 赚的 vs 亏的 | >1.5 合格, >2 优秀 |
+
+### 最大回撤恢复期（Recovery Period）
+净值从峰值跌到谷底，再涨回前高用了多久。**长恢复期 = 心理压力大**，容易割肉在底部。
+"""),
+
+        code("""
+def extended_risk_metrics(rets: pd.Series, rf: float = 0.0175) -> dict:
+    \"\"\"计算扩展风险指标：Sharpe / Sortino / Calmar / 胜率 / 盈亏比 / 最大回撤恢复期。\"\"\"
+    ann_factor = 252
+    nav = (1 + rets).cumprod()
+    n = len(rets)
+
+    rf_daily = rf / ann_factor
+    excess = rets - rf_daily
+
+    # Sharpe：双侧波动
+    std_all = excess.std(ddof=0)
+    sharpe = (excess.mean() / std_all) * np.sqrt(ann_factor) if std_all > 0 else np.nan
+
+    # Sortino：仅下行偏差（RMS of downside）
+    downside = excess.clip(upper=0.0)
+    downside_dev = np.sqrt((downside ** 2).mean())
+    sortino = (excess.mean() / downside_dev) * np.sqrt(ann_factor) if downside_dev > 0 else np.nan
+
+    # 最大回撤 + 恢复期
+    cummax = nav.cummax()
+    drawdown = nav / cummax - 1.0
+    max_dd = drawdown.min()
+    max_dd_date = drawdown.idxmin()
+    post_trough = nav.loc[max_dd_date:]
+    recovery_mask = post_trough >= cummax.loc[max_dd_date]
+    if recovery_mask.any():
+        recovery_date = post_trough[recovery_mask].index[0]
+        recovery_days = (recovery_date - max_dd_date).days
+    else:
+        recovery_days = None  # 截至样本末未恢复
+
+    # Calmar
+    total_ret = nav.iloc[-1] - 1.0
+    ann_ret = (1 + total_ret) ** (ann_factor / n) - 1 if n > 0 else np.nan
+    calmar = ann_ret / abs(max_dd) if max_dd < 0 else np.nan
+
+    # 胜率 + 盈亏比
+    win_rate = (rets > 0).sum() / n
+    gains = rets[rets > 0].sum()
+    losses = -rets[rets < 0].sum()
+    profit_factor = gains / losses if losses > 0 else np.nan
+
+    return {
+        'sharpe': sharpe, 'sortino': sortino, 'calmar': calmar,
+        'max_drawdown': max_dd, 'max_dd_date': max_dd_date,
+        'recovery_days': recovery_days,
+        'win_rate': win_rate, 'profit_factor': profit_factor,
+        'ann_return': ann_ret,
+    }
+
+byd = get_stock_data('002594').set_index('date')
+rets = byd['close'].pct_change().dropna()
+m = extended_risk_metrics(rets)
+
+print("比亚迪扩展风险指标（2026 采样）：")
+for k, v in m.items():
+    if k == 'max_dd_date':
+        print(f"  {k:>15}: {v}")
+    elif k == 'recovery_days':
+        print(f"  {k:>15}: {v if v is not None else '未恢复'} 天")
+    elif isinstance(v, float):
+        print(f"  {k:>15}: {v:.4f}")
+"""),
+
+        md("""
+**解读要点**：
+- **Sortino > Sharpe**：大幅上涨被算作"好风险"，是策略正面信号（分布右偏）
+- **Calmar > 1**：年化收益能覆盖最大回撤，心理上可承受
+- **胜率 40-50% 但盈亏比 > 2**：典型"小亏多次 + 大赚少次"的趋势策略形态
+- **恢复期 > 1 年**：一旦回撤需要耐心，短线心态不适合此标的
+- 在 `qtrader/metrics.py`（B-2 已更新）中，`compute_metrics` 已实现 Sharpe/Sortino/Calmar/胜率/盈亏比/持仓时长/信息比率 7 大指标——可对比教学版手写 vs 框架版工业实现
+"""),
+
+        md("""
+        ## 第 7 段：随堂小练
 
         ### 小练：模拟一次完整买卖扣费
         100 万资金，100 元买入 5000 股比亚迪，250 元全部卖出。算实际盈利和收益率（含所有成本）。
@@ -1372,7 +1469,7 @@ def build_l06() -> None:
         """),
 
         md("""
-        ## 第 7 段：课后练习 + 下节预告
+        ## 第 8 段：课后练习 + 下节预告
 
         ### 📝 `exercises/ex06.py`
         1. 写 `risk_metrics(df, rf=0.03)` 返回 dict 含 mean/std/sharpe/max_drawdown
@@ -1384,7 +1481,7 @@ def build_l06() -> None:
         """),
 
         md("""
-        ## 第 8 段：Jupyter tip 🔧
+        ## 第 9 段：Jupyter tip 🔧
         - `np.log(1 + rets)`：对数收益率，加性变可加，统计建模常用
         - `pd.Timedelta`、`pd.Timestamp`：比 datetime 模块好用
         - `np.sqrt(252)`：年化因子。252 是美股 ADR；A 股实际 244 左右，但学界惯例 252

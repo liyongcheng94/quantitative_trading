@@ -34,13 +34,31 @@ class DualMAStrategy(Strategy):
 
 
 class TurtleStrategy(Strategy):
-    """海龟（唐奇安通道）：突破 N 日最高买入，跌破 M 日最低卖出。"""
+    """海龟（唐奇安通道）：突破 N 日最高买入，跌破 M 日最低卖出。
+
+    可选 ATR 仓位管理：传入 atr_n 时，仓位按 risk_per_trade / atr_pct 缩放，
+    再 clip 到 [0, max_pos]。不传 atr_n 时退化为原 [0,1] 二值信号（向后兼容）。
+    """
     name = "海龟"
 
-    def __init__(self, entry_n: int = 20, exit_n: int = 10):
+    def __init__(
+        self,
+        entry_n: int = 20,
+        exit_n: int = 10,
+        atr_n: int | None = None,
+        risk_per_trade: float = 0.01,
+        max_pos: float = 1.0,
+    ):
         self.entry_n = entry_n
         self.exit_n = exit_n
-        self.params = {"entry_n": entry_n, "exit_n": exit_n}
+        self.atr_n = atr_n
+        self.risk_per_trade = risk_per_trade
+        self.max_pos = max_pos
+        self.params = {
+            "entry_n": entry_n, "exit_n": exit_n,
+            "atr_n": atr_n, "risk_per_trade": risk_per_trade,
+            "max_pos": max_pos,
+        }
 
     def generate_signals(self, df: pd.DataFrame) -> pd.Series:
         upper = df["high"].rolling(self.entry_n).max().shift(1)
@@ -51,7 +69,31 @@ class TurtleStrategy(Strategy):
         raw[buy] = 1.0
         raw[sell] = 0.0
         filled = raw.ffill().fillna(0)
-        return filled.shift(1).fillna(0).astype(float)
+
+        # 默认二值信号（向后兼容）
+        if self.atr_n is None:
+            return filled.shift(1).fillna(0).astype(float)
+
+        # ATR 仓位缩放：position = clip(risk / atr_pct, 0, max_pos)
+        # atr_pct = ATR / close （标准化为百分比波动）
+        prev_close = df["close"].shift(1)
+        tr = pd.concat(
+            [
+                df["high"] - df["low"],
+                (df["high"] - prev_close).abs(),
+                (df["low"] - prev_close).abs(),
+            ],
+            axis=1,
+        ).max(axis=1)
+        atr = tr.rolling(self.atr_n).mean()
+        atr_pct = (atr / df["close"]).fillna(0.0)
+
+        # 单位风险对应的仓位比例（每单位价格波动 1 ATR 时，仓位 = risk/atr_pct）
+        sized = (self.risk_per_trade / atr_pct.replace(0.0, np.nan)).fillna(0.0)
+        sized = sized.clip(0.0, self.max_pos)
+        # 仅在「持仓状态」下应用 ATR 仓位；不持仓时为 0
+        position = filled * sized
+        return position.shift(1).fillna(0).astype(float)
 
 
 class GridStrategy(Strategy):

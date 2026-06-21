@@ -26,12 +26,14 @@ def main() -> int:
     parser.add_argument("--end", default="2026-06-18", help="结束日期 YYYY-MM-DD")
     parser.add_argument("--commission", type=float, default=0.001,
                         help="单边费率，默认 0.001 (0.1%%)")
+    parser.add_argument("--no-cache", action="store_true",
+                        help="禁用 parquet 本地缓存（默认启用）")
     parser.add_argument("--save", default=None,
                         help="图表保存路径（设置后不弹窗）")
     args = parser.parse_args()
 
     try:
-        df = fetch_data(args.code, args.start, args.end)
+        df = fetch_data(args.code, args.start, args.end, use_cache=not args.no_cache)
         print(f"[数据] {len(df)} 个交易日，范围 "
               f"{df['date'].iloc[0].strftime('%Y-%m-%d')} ~ "
               f"{df['date'].iloc[-1].strftime('%Y-%m-%d')}")
