@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📊 K线形态可视化 - A股红涨绿跌</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'PingFang SC', Roboto, 'Helvetica Neue', sans-serif;
+            background: #f5f7fa;
+            padding: 30px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .wrapper {
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.2rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #64748b;
+            font-size: 1.05rem;
+            margin-bottom: 40px;
+            border-bottom: 2px dashed #e2e8f0;
+            padding-bottom: 15px;
+        }
+        .subtitle span {
+            background: #1e293b;
+            color: white;
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin: 0 5px;
+        }
+
+        /* 网格布局 */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        /* 卡片样式 */
+        .card {
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05), 0 4px 10px rgba(0, 0, 0, 0.03);
+            padding: 25px 15px 20px;
+            text-align: center;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border: 1px solid #f1f5f9;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 35px rgba(0, 0, 0, 0.08);
+            border-color: #cbd5e1;
+        }
+
+        /* SVG 容器 */
+        .chart-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        svg {
+            display: block;
+            width: 80px;
+            height: 160px;
+            background: #fafcff;
+            border-radius: 12px;
+            border: 1px solid #eef2f6;
+        }
+
+        /* 文字标签 */
+        .card h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin: 10px 0 5px;
+            color: #0f172a;
+        }
+
+        .card .sub-line {
+            font-size: 0.85rem;
+            color: #475569;
+            background: #f1f5f9;
+            padding: 2px 12px;
+            border-radius: 30px;
+            display: inline-block;
+            margin-bottom: 12px;
+        }
+
+        .card .meaning {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin: 8px 0;
+        }
+
+        .card .detail {
+            font-size: 0.82rem;
+            color: #64748b;
+            line-height: 1.5;
+            text-align: left;
+            padding: 0 5px;
+            width: 100%;
+            border-top: 1px solid #f1f5f9;
+            padding-top: 12px;
+            margin-top: 5px;
+        }
+
+        .card .detail strong {
+            color: #334155;
+        }
+
+        .badge-bull {
+            color: #dc2626;
+        }
+        .badge-bear {
+            color: #16a34a;
+        }
+
+        /* 图例说明底部 */
+        .legend-box {
+            background: white;
+            border-radius: 16px;
+            padding: 20px 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+            border: 1px solid #e2e8f0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px 50px;
+            margin-top: 20px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.95rem;
+            color: #1e293b;
+        }
+
+        .legend-color {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            border: 1px solid #cbd5e1;
+        }
+
+        .color-red {
+            background: #dc2626;
+        }
+        .color-green {
+            background: #16a34a;
+        }
+        .color-black {
+            background: #1e293b;
+        }
+
+        .tip {
+            background: #fef9e7;
+            border-left: 4px solid #f59e0b;
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-top: 25px;
+            color: #92400e;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        .tip strong {
+            color: #b45309;
+        }
+
+        @media (max-width: 900px) {
+            .grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+            h1 {
+                font-size: 1.8rem;
+            }
+        }
+
+        @media (max-width: 500px) {
+            .grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            .wrapper {
+                padding: 0 5px;
+            }
+            svg {
+                width: 70px;
+                height: 140px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="wrapper">
+        <h1>📈 单根 K 线形态详解</h1>
+        <div class="subtitle">
+            <span>🇨🇳 A股惯例</span> 红色=涨 (阳线)  ·  绿色=跌 (阴线)  ·  颜色与美股相反
+        </div>
+
+        <!-- 4种形态卡片 -->
+        <div class="grid">
+
+            <!-- 1. 大阳线 -->
+            <div class="card">
+                <div class="chart-container">
+                    <svg viewBox="0 0 100 200" xmlns="http://www.w3.org/2000/svg">
+                        <!-- 上影线 (极短) -->
+                        <line x1="50" y1="15" x2="50" y2="35" stroke="#1e293b" stroke-width="2.5" stroke-linecap="round"/>
+                        <!-- 实体 (红色，很长) -->
+                        <rect x="32" y="35" width="36" height="100" fill="#dc2626" stroke="#1e293b" stroke-width="1.5" rx="2"/>
+                        <!-- 下影线 (极短) -->
+                        <line x1="50" y1="135" x2="50" y2="155" stroke="#1e293b" stroke-width="2.5" stroke-linecap="round"/>
+                        <!-- 标注文字 -->
+                        <text x="10" y="25" font-size="11" fill="#475569" font-weight="bold">最高</text>
+                        <text x="10" y="180" font-size="11" fill="#475569" font-weight="bold">最低</text>
+                    </svg>
+                </div>
+                <h3>🔥 大阳线</h3>
+                <span class="sub-line">实体长 · 影线短</span>
+                <div class="meaning" style="color:#dc2626;">✅ 强势看涨</div>
+                <div class="detail">
+                    <strong>开盘</strong> 在低位，<strong>收盘</strong> 在高位。<br>
+                    多方从开盘一直压制空方到收盘。<br>
+                    <span style="color:#dc2626;">⚡ 底部放量出现</span> → 启动信号；
+                    高位出现需警惕诱多。
+                </div>
+            </div>
+
+            <!-- 2. 十字星 -->
+            <div class="card">
+                <div class="chart-container">
+                    <svg viewBox="0 0 100 200" xmlns="http://www.w3.org/2000/svg">
+                        <!-- 上影线 (较长) -->
+                        <line x1="50" y1="15" x2="50" y2="85" stroke="#1e293b" stroke-width="2.5" stroke-linecap="round"/>
+                        <!-- 实体 (极小，几乎为一条线，此处画成扁平矩形便于观察) -->
+                        <rect x="38" y="85" width="24" height="8" fill="#dc2626" stroke="#1e293b" stroke-width="1.5" rx="2"/>
+                        <!-- 下影线 (较长) -->
+                        <line x1="50" y1="93" x2="50" y2="185" stroke="#1e293b" stroke-width="2.5" stroke-linecap="round"/>
+                        <text x="10" y="25" font-size="11" fill="#475569" font-weight="bold">最高</text>
+                        <text x="10" y="180" font-size="11" fill="#475569" font-weight="bold">最低</text>
+                        <!-- 标注开/收盘几乎相等 -->
+                        <text x="55" y="83" font-size="9" fill="#64748b">开≈收</text>
+                    </svg>
+                </div>
+                <h3>✚ 十字星</h3>
+                <span class="sub-line">开≈收 · 上下影线</span>
+                <div class="meaning" style="color:#f59e0b;">⚖️ 多空胶着 · 变盘前夜</div>
+                <div class="detail">
+                    <strong>开盘价 ≈ 收盘价</strong>，多空激烈博弈未分胜负。<br>
+                    <span style="color:#b45309;">⚠️ 需次日K线确认方向</span><br>
+                    大涨后出现 → <strong>黄昏之星</strong> (看跌)；
+                    大跌后出现 → <strong>早晨之星</strong> (看涨)。
+                </div>
+            </div>
+
+            <!-- 3. 锤头线 -->
+            <div class="card">
+                <div class="chart-container">
+                    <svg viewBox="0 0 100 200" xmlns="http://www.w3.org/2000/svg">
+                        <!-- 上影线 (几乎没有，或者极短) -->
+                        <line x1="50" y1="90" x2="50" y2="95" stroke="#1e293b" stroke-width="2.5" stroke-linecap="round"/>
+                        <!-- 实体 (很小，阳线为佳) -->
+                        <rect x="32" y="95" width="36" height="18" fill="#dc2626" stroke="#1e293b" stroke-width="1.5" rx="2"/>
+                        <!-- 下影线 (极长，至少是实体的2倍) -->
+                        <line x1="50" y1="113" x2="50" y2="185" stroke="#1e293b" stroke-width="2.5" stroke-linecap="round"/>
+                        <text x="10" y="25" font-size="11" fill="#475569" font-weight="bold">最高</text>
+                        <text x="10" y="180" font-size="11" fill="#475569" font-weight="bold">最低</text>
+                        <!-- 下影线长度标注 -->
+                        <text x="55" y="150" font-size="9" fill="#16a34a" font-weight="bold">下影≥实体2倍</text>
+                    </svg>
+                </div>
+                <h3>🔨 锤头线</h3>
+                <span class="sub-line">下影长 · 实体小 · 无上影</span>
+                <div class="meaning" style="color:#16a34a;">📈 底部反转信号</div>
+                <div class="detail">
+                    <strong>下影线极长</strong>，代表下方承接盘强劲。<br>
+                    <span style="color:#16a34a;">✅ 必须出现在下跌趋势末端</span><br>
+                    <span style="color:#b45309;">⚠️ 位置决定性质：</span> 高位出现叫
+                    <strong>“吊颈线”</strong> (看跌)，低位出现才是“锤头线” (看涨)。
+                </div>
+            </div>
+
+            <!-- 4. 一字板 -->
+            <div class="card">
+                <div class="chart-container">
+                    <svg viewBox="0 0 100 200" xmlns="http://www.w3.org/2000/svg">
+                        <!-- 一字板：没有任何影线，开盘=收盘=最高=最低 -->
+                        <!-- 为了可视效果，画一个扁平的矩形，像一条横线 -->
+                        <rect x="25" y="93" width="50" height="14" fill="#dc2626" stroke="#1e293b" stroke-width="1.5" rx="2"/>
+                        <!-- 标注文字 -->
+                        <text x="10" y="25" font-size="11" fill="#475569" font-weight="bold">最高=最低</text>
+                        <text x="10" y="180" font-size="11" fill="#475569" font-weight="bold">开=收</text>
+                        <!-- 中间标注 -->
+                        <text x="30" y="120" font-size="12" fill="white" font-weight="bold" letter-spacing="1">涨停</text>
+                    </svg>
+                </div>
+                <h3>📏 一字板</h3>
+                <span class="sub-line">OHLC 全相等</span>
+                <div class="meaning" style="color:#dc2626;">🚀 极端情绪 · 涨/跌停封死</div>
+                <div class="detail">
+                    <strong>涨停一字板</strong>：买盘极强，卖方惜售 (红色)。<br>
+                    <strong>跌停一字板</strong>：卖盘极强，买方消失 (绿色)。<br>
+                    <span style="color:#b45309;">⚠️ 放量开板 (T字板)</span> → 筹码松动，
+                    可能是出货或洗盘开始。
+                </div>
+            </div>
+        </div>
+
+        <!-- 图例与补充说明 -->
+        <div class="legend-box">
+            <div class="legend-item">
+                <div class="legend-color color-red"></div>
+                <span><strong>阳线</strong> (红) : Close &gt; Open</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color color-green"></div>
+                <span><strong>阴线</strong> (绿) : Close &lt; Open</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color color-black" style="background: #1e293b; height: 2px; border: none;"></div>
+                <span>影线 : 最高/最低价与实体的差值</span>
+            </div>
+        </div>
+
+        <!-- 核心心法 -->
+        <div class="tip">
+            💡 <strong>核心心法：</strong>
+            “单根K线定强弱，多根K线定趋势，结合位置定乾坤。”
+            <br>
+            <strong>上影线</strong> 代表上方抛压 (卖盘强) ；<strong>下影线</strong> 代表下方支撑 (买盘强)。
+            任何单根K线形态都需要 <strong>次日验证</strong> 及 <strong>成交量配合</strong>，切勿仅凭单根K线做出买卖决策。
+        </div>
+
+        <!-- 底部说明 -->
+        <div style="text-align: center; margin-top: 30px; color: #94a3b8; font-size: 0.8rem; border-top: 1px solid #e2e8f0; padding-top: 20px;">
+            📍 可视化适用于 A 股市场 · 红色代表上涨 (阳线) ，绿色代表下跌 (阴线)  ·  与美股颜色惯例相反
+        </div>
+    </div>
+
+</body>
+</html>
