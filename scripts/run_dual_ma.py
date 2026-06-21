@@ -108,7 +108,7 @@ def main() -> int:
         print(f"  买入持有总收益率  : {m['bench_total_return']:.2%}")
         print(f"  最大回撤          : {m['max_drawdown']:.2%}")
         print(f"  最大回撤时间      : {m['max_dd_date'].strftime('%Y-%m-%d')}")
-        print(f"  夏普比率 (rf=3%)  : {m['sharpe']:.4f}")
+        print(f"  夏普比率 (rf=1.75%): {m['sharpe']:.4f}")
         print(f"  Calmar            : {m['calmar']:.4f}")
         print("=" * 60 + "\n")
 

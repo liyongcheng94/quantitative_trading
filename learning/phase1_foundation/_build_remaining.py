@@ -1199,7 +1199,7 @@ def build_l06() -> None:
         | 协方差 | E[(x-μx)(y-μy)] | 相关系数的分子 |
 
         ### 关键概念：风险与收益的权衡
-        - **夏普比率 = (μ - rf) / σ**：单位风险的超额回报（rf = 无风险利率，A 股常用 3%）
+        - **夏普比率 = (μ - rf) / σ**：单位风险的超额回报（rf = 无风险利率，2026 年中国 10 年期国债 ≈ 1.75%）
         - 夏普 > 1：不错；> 2：优秀；> 3：可疑（要排查未来函数）
 
         ### A 股交易成本三件套（2026 现行）
@@ -1472,7 +1472,7 @@ for k, v in m.items():
         ## 第 8 段：课后练习 + 下节预告
 
         ### 📝 `exercises/ex06.py`
-        1. 写 `risk_metrics(df, rf=0.03)` 返回 dict 含 mean/std/sharpe/max_drawdown
+        1. 写 `risk_metrics(df, rf=0.0175)` 返回 dict 含 mean/std/sharpe/max_drawdown
         2. 写 `backtest_with_cost(df, signal, cost_bps=15)` 返回含成本的净值曲线
         3. 对三股 + 上证指数（000001）算相关矩阵，找出"和比亚迪相关性最低的"
 
@@ -1504,12 +1504,12 @@ def build_ex06() -> None:
         from _data import get_stock_data
 
 
-        def risk_metrics(df: pd.DataFrame, rf: float = 0.03) -> dict:
+        def risk_metrics(df: pd.DataFrame, rf: float = 0.0175) -> dict:
             \"\"\"计算风险指标。
 
             Args:
                 df: OHLC DataFrame
-                rf: 无风险年利率，默认 3%
+                rf: 无风险年利率，默认 1.75%（2026 年中国 10 年期国债）
 
             Returns:
                 {

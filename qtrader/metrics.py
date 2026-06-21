@@ -9,7 +9,7 @@ def compute_metrics(
     strat_ret: pd.Series,
     nav: pd.Series,
     bench_ret: pd.Series,
-    rf_annual: float = 0.03,
+    rf_annual: float = 0.0175,
     signal: pd.Series | None = None,
 ) -> dict:
     """计算策略绩效指标。nav / strat_ret / bench_ret 共享 datetime index。

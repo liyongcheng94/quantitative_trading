@@ -9,12 +9,12 @@ import pandas as pd
 from _data import get_stock_data
 
 
-def risk_metrics(df: pd.DataFrame, rf: float = 0.03) -> dict:
+def risk_metrics(df: pd.DataFrame, rf: float = 0.0175) -> dict:
     """计算风险指标。
 
     Args:
         df: OHLC DataFrame
-        rf: 无风险年利率，默认 3%
+        rf: 无风险年利率，默认 1.75%（2026 年中国 10 年期国债）
 
     Returns:
         {

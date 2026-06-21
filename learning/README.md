@@ -2,13 +2,28 @@
 
 本目录是 `qtrader` 项目配套的系统化学习材料，按 roadmap 的四阶段推进。
 
-## 阶段一：打地基（1.5–2 周）— 进行中
+## 阶段一：打地基（Phase 1 Foundation）
 
 **目标**：理解 A 股市场基本规则，掌握 Pandas/NumPy 金融场景应用，养成向量化思维。
 
 **载体**：10 节 Jupyter Notebook 互动课，每节 45–90 分钟。
 
 **位置**：[phase1_foundation/](phase1_foundation/)
+
+## 阶段二：策略与组合（Phase 2 Strategies）
+
+**目标**：补齐 Phase 1 最大盲区——从单股技术指标跨到多策略择时、多股选股、组合构建。
+
+**载体**：5 节 Jupyter Notebook 互动课，每节 75–90 分钟。
+
+**内容**：
+- L11 双均线择时（DualMA）
+- L12 海龟策略（唐奇安通道 + ATR 仓位）
+- L13 网格策略（Grid Trading）
+- L14 多股选股（价值/动量/低波动因子）
+- L15 组合构建（等权/反向波动/Markowitz）
+
+**位置**：[phase2_strategies/](phase2_strategies/)
 
 **课程目录与进度**：见 [INDEX.md](INDEX.md)
 
