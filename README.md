@@ -14,7 +14,12 @@ quantitative_trading/
 ├── scripts/          # 可执行入口（多策略对比、单策略、HTML 报告）
 ├── tests/            # pytest 单元测试
 ├── outputs/          # 回测产物（PNG、HTML）
-├── docs/             # 学习材料、路线图
+├── docs/             # 学习路线图（roadmap.html 故事版 + 速览版）
+├── learning/         # 系统化课程教材（Phase 1：10 节互动 Jupyter 课）
+│   ├── README.md     # 课程总览
+│   ├── INDEX.md      # 10 课目录与进度
+│   ├── progress.md   # 学习日志
+│   └── phase1_foundation/  # 阶段一：金融通识 + Pandas/NumPy + 向量化
 └── requirements.txt
 ```
 
@@ -75,6 +80,12 @@ print(result.metrics)
 
 ## 学习路径
 
+**系统化课程**（推荐入门顺序）：
+- [learning/](learning/) — Phase 1「打地基」10 节互动 Jupyter 课程
+- [learning/INDEX.md](learning/INDEX.md) — 课程目录与进度跟踪
+- [learning/README.md](learning/README.md) — 课程使用说明
+
+**路线图与心得**：
 - [docs/roadmap.html](docs/roadmap.html) — 完整四阶段学习路线图（故事版）
 - [docs/roadmap2.html](docs/roadmap2.html) — 路线图速览版（4 列横向）
 - [outputs/report.html](outputs/report.html) — 双均线实验心得（三股对比）
