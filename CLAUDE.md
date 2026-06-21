@@ -42,7 +42,7 @@
 ## 学习路径
 - [docs/roadmap.html](docs/roadmap.html) — 量化学习四阶段路线图（故事版）
 - [docs/roadmap2.html](docs/roadmap2.html) — 路线图速览版（4 列横向）
-- [outputs/report.html](outputs/report.html) — 双均线三股对比心得
+- 双均线三股对比心得 — 本地运行 `scripts.build_report` 生成 `outputs/report.html`（产物 gitignored，GitHub 上无此文件）
 
 ## 免责声明
 仅学习交流，不构成投资建议。

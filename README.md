@@ -88,7 +88,7 @@ print(result.metrics)
 **路线图与心得**：
 - [docs/roadmap.html](docs/roadmap.html) — 完整四阶段学习路线图（故事版）
 - [docs/roadmap2.html](docs/roadmap2.html) — 路线图速览版（4 列横向）
-- [outputs/report.html](outputs/report.html) — 双均线实验心得（三股对比）
+- 双均线实验心得（三股对比）— 运行 `.venv/Scripts/python.exe -m scripts.build_report` 生成本地 `outputs/report.html`（产物 gitignored，未入库）
 
 ## 免责声明
 
